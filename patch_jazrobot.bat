@@ -1,14 +1,21 @@
 @echo off
 title JazroBot Patcher
 
+REM Check if already elevated
+if "%~1"=="ELEVATED" (
+    cd /d "%~2"
+    goto :continue
+)
+
 REM Check for admin privileges
 net session >nul 2>&1
 if %errorLevel% neq 0 (
     echo Requesting administrator privileges...
-    powershell -Command "Start-Process -FilePath '%~f0' -ArgumentList 'ELEVATED' -Verb RunAs -Wait"
+    powershell -Command "Start-Process -FilePath '%~f0' -ArgumentList 'ELEVATED','%CD%' -Verb RunAs"
     exit /b
 )
 
+:continue
 REM Check if running in ArduBlock directory
 if not exist "www" (
     echo Error: This patcher must be run from the ArduBlock directory!
@@ -39,7 +46,7 @@ if %errorlevel% equ 1 (
     if exist "patch_jazrobot_new.bat" (
         move /Y "patch_jazrobot_new.bat" "%~f0"
         echo Patcher has been updated. Restarting...
-        start "" "%~f0"
+        start "" "%~f0" ELEVATED
         exit /b
     )
 )
