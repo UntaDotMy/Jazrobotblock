@@ -5,7 +5,7 @@ Blockly.Arduino['jazrobot_start'] = function(block) {
   Blockly.Arduino.definitions_['define_serial'] = '#include <Arduino.h>';
   
   // Generate setup function
-  Blockly.Arduino.setups_['setup_serial'] = '  Serial.begin(115200);';
+  Blockly.Arduino.setups_['setup_serial'] = 'Serial.begin(115200);';
   if (setupCode) {
     Blockly.Arduino.setups_['setup_custom'] = setupCode;
   }
@@ -403,6 +403,112 @@ Blockly.Arduino['jazrobot_turn_timed'] = function(block) {
     code += 'ledcWrite(0, 0);\n';
     code += 'ledcWrite(0, 0);\n';
   }
+  
+  return code;
+};
+
+// LED control code generators
+Blockly.Arduino['jazrobot_led_color'] = function(block) {
+  var color = block.getFieldValue('COLOR');
+  var code = '';
+  
+  if (color === 'green') {
+    code += '// Turn on Green LED\n';
+    code += 'pinMode(4, OUTPUT);\n';
+    code += 'digitalWrite(4, 0);\n';
+    code += 'pinMode(23, OUTPUT);\n';
+    code += 'digitalWrite(23, 1);\n';
+    code += 'pinMode(19, OUTPUT);\n';
+    code += 'digitalWrite(19, 1);\n';
+  } else if (color === 'red') {
+    code += '// Turn on Red LED\n';
+    code += 'pinMode(4, OUTPUT);\n';
+    code += 'digitalWrite(4, 1);\n';
+    code += 'pinMode(23, OUTPUT);\n';
+    code += 'digitalWrite(23, 0);\n';
+    code += 'pinMode(19, OUTPUT);\n';
+    code += 'digitalWrite(19, 1);\n';
+  } else if (color === 'blue') {
+    code += '// Turn on Blue LED\n';
+    code += 'pinMode(4, OUTPUT);\n';
+    code += 'digitalWrite(4, 1);\n';
+    code += 'pinMode(23, OUTPUT);\n';
+    code += 'digitalWrite(23, 1);\n';
+    code += 'pinMode(19, OUTPUT);\n';
+    code += 'digitalWrite(19, 0);\n';
+  }
+  
+  return code;
+};
+
+Blockly.Arduino['jazrobot_led_color_timed'] = function(block) {
+  var color = block.getFieldValue('COLOR');
+  var seconds = Blockly.Arduino.valueToCode(block, 'SECONDS', Blockly.Arduino.ORDER_ATOMIC) || '1';
+  var code = '';
+  
+  if (color === 'green') {
+    code += '// Turn on Green LED with timed duration\n';
+    code += 'pinMode(4, OUTPUT);\n';
+    code += 'digitalWrite(4, 0);\n';
+    code += 'pinMode(23, OUTPUT);\n';
+    code += 'digitalWrite(23, 1);\n';
+    code += 'pinMode(19, OUTPUT);\n';
+    code += 'digitalWrite(19, 1);\n';
+    code += 'delay(' + seconds + ' * 1000);\n';
+    code += '// Turn off LED after specified time\n';
+    code += 'pinMode(4, OUTPUT);\n';
+    code += 'digitalWrite(4, 1);\n';
+    code += 'pinMode(23, OUTPUT);\n';
+    code += 'digitalWrite(23, 1);\n';
+    code += 'pinMode(19, OUTPUT);\n';
+    code += 'digitalWrite(19, 1);\n';
+  } else if (color === 'red') {
+    code += '// Turn on Red LED with timed duration\n';
+    code += 'pinMode(4, OUTPUT);\n';
+    code += 'digitalWrite(4, 1);\n';
+    code += 'pinMode(23, OUTPUT);\n';
+    code += 'digitalWrite(23, 0);\n';
+    code += 'pinMode(19, OUTPUT);\n';
+    code += 'digitalWrite(19, 1);\n';
+    code += 'delay(' + seconds + ' * 1000);\n';
+    code += '// Turn off LED after specified time\n';
+    code += 'pinMode(4, OUTPUT);\n';
+    code += 'digitalWrite(4, 1);\n';
+    code += 'pinMode(23, OUTPUT);\n';
+    code += 'digitalWrite(23, 1);\n';
+    code += 'pinMode(19, OUTPUT);\n';
+    code += 'digitalWrite(19, 1);\n';
+  } else if (color === 'blue') {
+    code += '// Turn on Blue LED with timed duration\n';
+    code += 'pinMode(4, OUTPUT);\n';
+    code += 'digitalWrite(4, 1);\n';
+    code += 'pinMode(23, OUTPUT);\n';
+    code += 'digitalWrite(23, 1);\n';
+    code += 'pinMode(19, OUTPUT);\n';
+    code += 'digitalWrite(19, 0);\n';
+    code += 'delay(' + seconds + ' * 1000);\n';
+    code += '// Turn off LED after specified time\n';
+    code += 'pinMode(4, OUTPUT);\n';
+    code += 'digitalWrite(4, 1);\n';
+    code += 'pinMode(23, OUTPUT);\n';
+    code += 'digitalWrite(23, 1);\n';
+    code += 'pinMode(19, OUTPUT);\n';
+    code += 'digitalWrite(19, 1);\n';
+  }
+  
+  return code;
+};
+
+Blockly.Arduino['jazrobot_led_off'] = function(block) {
+  var code = '';
+  
+  code += '// Turn off all LEDs\n';
+  code += 'pinMode(4, OUTPUT);\n';
+  code += 'digitalWrite(4, 1);\n';
+  code += 'pinMode(23, OUTPUT);\n';
+  code += 'digitalWrite(23, 1);\n';
+  code += 'pinMode(19, OUTPUT);\n';
+  code += 'digitalWrite(19, 1);\n';
   
   return code;
 }; 

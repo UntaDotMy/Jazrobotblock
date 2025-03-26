@@ -288,4 +288,60 @@ Blockly.Blocks['jazrobot_turn_timed'] = {
     this.setTooltip("Turn the robot left or right for a specific time at the given speed");
     this.setHelpUrl("");
   }
+};
+
+// LED control blocks
+Blockly.Blocks['jazrobot_led_color'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Turn on")
+        .appendField(new Blockly.FieldDropdown([
+          ["Green", "green"], 
+          ["Red", "red"],
+          ["Blue", "blue"]
+        ]), "COLOR")
+        .appendField("LED");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setColour("#E67E22");
+    this.setTooltip("Turn on LED with specific color");
+    this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['jazrobot_led_color_timed'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Turn on")
+        .appendField(new Blockly.FieldDropdown([
+          ["Green", "green"], 
+          ["Red", "red"],
+          ["Blue", "blue"]
+        ]), "COLOR")
+        .appendField("LED for");
+    this.appendValueInput("SECONDS")
+        .setCheck("Number");
+    this.appendDummyInput()
+        .appendField("seconds");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setColour("#E67E22");
+    this.setTooltip("Turn on LED with specific color for a set time");
+    this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['jazrobot_led_off'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Turn off LED");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setColour("#E67E22");
+    this.setTooltip("Turn off all LEDs");
+    this.setHelpUrl("");
+  }
 }; 
