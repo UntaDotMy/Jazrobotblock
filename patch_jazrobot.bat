@@ -30,25 +30,44 @@ echo JazroBot Patcher for ArduBlock
 echo ============================
 echo.
 
-REM Set GitHub repository URL
+REM Set GitHub repository URL and current patcher version
 set "GITHUB_RAW=https://raw.githubusercontent.com/UntaDotMy/Jazrobotblock/main"
+set "PATCHER_VERSION=1.0.1"
 
-REM Check version
+REM Check patcher version first
+powershell -Command "& { try { $patcherVersion = (Invoke-WebRequest '%GITHUB_RAW%/patcher_version.txt' -UseBasicParsing).Content.Trim(); if ([version]$patcherVersion -gt [version]'%PATCHER_VERSION%') { exit 1 } } catch { exit 0 } }"
+if %errorlevel% equ 1 (
+    echo A new patcher version is available.
+    echo Current version: %PATCHER_VERSION%
+    echo New version available. Updating patcher...
+    powershell -Command "& { try { Invoke-WebRequest '%GITHUB_RAW%/patch_jazrobot.bat' -OutFile 'patch_jazrobot_new.bat' } catch { exit 1 } }"
+    if exist "patch_jazrobot_new.bat" (
+        move /Y "patch_jazrobot_new.bat" "%~f0"
+        echo Patcher has been updated. Restarting...
+        start "" "%~f0" "ELEVATED" "%CD%"
+        exit /b
+    )
+)
+
+REM Check JazroBot files version
 set "LOCAL_VERSION=0.0.0"
 if exist "version.txt" (
     set /p LOCAL_VERSION=<version.txt
 )
 
-powershell -Command "& { $version = Invoke-WebRequest '%GITHUB_RAW%/version.txt' -UseBasicParsing | Select-Object -ExpandProperty Content; if ($version -gt '%LOCAL_VERSION%') { exit 1 } }"
+powershell -Command "& { try { $jazrobotVersion = (Invoke-WebRequest '%GITHUB_RAW%/version.txt' -UseBasicParsing).Content.Trim(); if ([version]$jazrobotVersion -gt [version]'%LOCAL_VERSION%') { exit 1 } } catch { exit 0 } }"
 if %errorlevel% equ 1 (
-    echo Updating patcher...
-    powershell -Command "& { Invoke-WebRequest '%GITHUB_RAW%/patch_jazrobot.bat' -OutFile 'patch_jazrobot_new.bat' }"
-    if exist "patch_jazrobot_new.bat" (
-        move /Y "patch_jazrobot_new.bat" "%~f0"
-        echo Patcher has been updated. Restarting...
-        start "" "%~f0" ELEVATED
-        exit /b
-    )
+    echo.
+    echo New JazroBot files version available
+    echo Current version: %LOCAL_VERSION%
+    echo Installing updates...
+    echo.
+) else (
+    echo.
+    echo JazroBot files are up to date.
+    echo Current version: %LOCAL_VERSION%
+    timeout /t 2 /nobreak >nul
+    exit /b
 )
 
 REM Download and install files
