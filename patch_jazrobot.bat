@@ -128,59 +128,70 @@ move /Y "version_new.txt" "version.txt"
 echo Updating ArduBlock configuration...
 echo.
 
-REM Update index.html to include JazroBot scripts
-echo Updating index.html...
-powershell -Command ^"^
-$indexPath = Join-Path (Get-Location).Path 'www\index.html';^
-$content = Get-Content $indexPath -Raw;^
-if (-not ($content -match 'jazrobot_blocs.js')) {^
-    $content = $content -replace '(.*)</head>',^
-    ('    <script type=^"text/javascript^" src=^"blocs^&generateurs/jazrobot_blocs.js^"></script>'`n +^
-     '    <script type=^"text/javascript^" src=^"blocs^&generateurs/jazrobot_generateurs_cpp.js^"></script>'`n +^
-     '$1</head>');^
-    Set-Content $indexPath $content;^
-}^"
+REM Create a temporary PowerShell script for file updates
+echo $ErrorActionPreference = 'Stop' > update_config.ps1
+echo. >> update_config.ps1
+echo try { >> update_config.ps1
+echo     # Update index.html >> update_config.ps1
+echo     $indexPath = Join-Path $pwd.Path 'www\index.html' >> update_config.ps1
+echo     $indexContent = Get-Content $indexPath -Raw >> update_config.ps1
+echo     if (-not ($indexContent -match 'jazrobot_blocs.js')) { >> update_config.ps1
+echo         $indexContent = $indexContent -replace '(.*)</head>', '    <script type="text/javascript" src="blocs&generateurs/jazrobot_blocs.js"></script>`n    <script type="text/javascript" src="blocs&generateurs/jazrobot_generateurs_cpp.js"></script>`n$1</head>' >> update_config.ps1
+echo         Set-Content $indexPath $indexContent >> update_config.ps1
+echo     } >> update_config.ps1
+echo. >> update_config.ps1
+echo     # Update boards.js >> update_config.ps1
+echo     $boardsPath = Join-Path $pwd.Path 'www\js\boards.js' >> update_config.ps1
+echo     $boardsContent = Get-Content $boardsPath -Raw >> update_config.ps1
+echo     if (-not ($boardsContent -match 'profile\["jazrobot"\]')) { >> update_config.ps1
+echo         $jazrobotProfile = @' >> update_config.ps1
+echo profile["jazrobot"] = { >> update_config.ps1
+echo     description: "JazroBot ESP32", >> update_config.ps1
+echo     digital: ["0","2","4","5","12","13","14","15","25","26","27"], >> update_config.ps1
+echo     BUILTIN_LED: "2", >> update_config.ps1
+echo     dropdownPWM: [["0", "0"], ["2", "2"], ["4", "4"], ["5", "5"], ["12", "12"], ["13", "13"], ["14", "14"], ["15", "15"], ["25", "25"], ["26", "26"], ["27", "27"]], >> update_config.ps1
+echo     dropdownAnalog: [["A0", "A0"]], >> update_config.ps1
+echo     interrupt: ["0", "2", "4", "5", "12", "13", "14", "15", "25", "26", "27"], >> update_config.ps1
+echo     picture : "media/esp32.jpg", >> update_config.ps1
+echo     serial : ["300", "600", "1200", "2400", "4800", "9600", "14400", "19200", "28800", "31250", "38400", "57600", "115200"], >> update_config.ps1
+echo     serialPin: [["Rx/Tx","0"]], >> update_config.ps1
+echo     upload_arg: "esp32:esp32:esp32", >> update_config.ps1
+echo     cpu: "jazrobot", >> update_config.ps1
+echo     speed: "115200", >> update_config.ps1
+echo     prog: "arduino", >> update_config.ps1
+echo     usb: "micro USB", >> update_config.ps1
+echo     voltage: "3,3V", >> update_config.ps1
+echo     inout: "20" >> update_config.ps1
+echo }; >> update_config.ps1
+echo '@ >> update_config.ps1
+echo         $boardsContent = $boardsContent -replace '}\s*$', ($jazrobotProfile + "`n}") >> update_config.ps1
+echo         Set-Content $boardsPath $boardsContent >> update_config.ps1
+echo     } >> update_config.ps1
+echo. >> update_config.ps1
+echo     # Update blocklino.js >> update_config.ps1
+echo     $blocklinoPath = Join-Path $pwd.Path 'www\js\blocklino.js' >> update_config.ps1
+echo     $blocklinoContent = Get-Content $blocklinoPath -Raw >> update_config.ps1
+echo     if (-not ($blocklinoContent -match 'cpu == "jazrobot"')) { >> update_config.ps1
+echo         $blocklinoContent = $blocklinoContent -replace '(new_toolbox = "toolbox_arduino_all";)', '$1`n    } else if (cpu == "jazrobot") {`n        new_toolbox = "toolbox_jazrobot";' >> update_config.ps1
+echo         Set-Content $blocklinoPath $blocklinoContent >> update_config.ps1
+echo     } >> update_config.ps1
+echo } catch { >> update_config.ps1
+echo     Write-Error $_.Exception.Message >> update_config.ps1
+echo     exit 1 >> update_config.ps1
+echo } >> update_config.ps1
 
-REM Update boards.js to include JazroBot board
-echo Updating boards.js...
-powershell -Command ^"^
-$boardsPath = Join-Path (Get-Location).Path 'www\js\boards.js';^
-$content = Get-Content $boardsPath -Raw;^
-if (-not ($content -match 'profile\[^"jazrobot^"\]')) {^
-    $jazrobotProfile = @'
-profile[`"jazrobot`"] = {
-    description: `"JazroBot ESP32`",
-    digital: [`"0`",`"2`",`"4`",`"5`",`"12`",`"13`",`"14`",`"15`",`"25`",`"26`",`"27`"],
-    BUILTIN_LED: `"2`",
-    dropdownPWM: [[`"0`", `"0`"], [`"2`", `"2`"], [`"4`", `"4`"], [`"5`", `"5`"], [`"12`", `"12`"], [`"13`", `"13`"], [`"14`", `"14`"], [`"15`", `"15`"], [`"25`", `"25`"], [`"26`", `"26`"], [`"27`", `"27`"]],
-    dropdownAnalog: [[`"A0`", `"A0`"]],
-    interrupt: [`"0`", `"2`", `"4`", `"5`", `"12`", `"13`", `"14`", `"15`", `"25`", `"26`", `"27`"],
-    picture : `"media/esp32.jpg`",
-    serial : [`"300`", `"600`", `"1200`", `"2400`", `"4800`", `"9600`", `"14400`", `"19200`", `"28800`", `"31250`", `"38400`", `"57600`", `"115200`"],
-    serialPin: [[`"Rx/Tx`",`"0`"]],
-    upload_arg: `"esp32:esp32:esp32`",
-    cpu: `"jazrobot`",
-    speed: `"115200`",
-    prog: `"arduino`",
-    usb: `"micro USB`",
-    voltage: `"3,3V`",
-    inout: `"20`"
-};
-'@
-    $content = $content -replace '}\s*$', ($jazrobotProfile + "`n}")
-    Set-Content $boardsPath $content
-}^"
+REM Execute the PowerShell script
+echo Updating configuration files...
+powershell -ExecutionPolicy Bypass -File update_config.ps1
+if errorlevel 1 (
+    echo Error: Failed to update configuration files.
+    del update_config.ps1
+    pause
+    exit /b 1
+)
 
-REM Update blocklino.js to include JazroBot toolbox
-echo Updating blocklino.js...
-powershell -Command ^"^
-$blocklinoPath = Join-Path (Get-Location).Path 'www\js\blocklino.js';^
-$content = Get-Content $blocklinoPath -Raw;^
-if (-not ($content -match 'cpu == ^"jazrobot^"')) {^
-    $content = $content -replace '(new_toolbox = ^"toolbox_arduino_all^";)',^
-    ('$1'`n + '    } else if (cpu == ^"jazrobot^") {'`n + '        new_toolbox = ^"toolbox_jazrobot^";');^
-    Set-Content $blocklinoPath $content^
-}^"
+REM Clean up
+del update_config.ps1
 
 echo.
 echo Patch completed successfully!
