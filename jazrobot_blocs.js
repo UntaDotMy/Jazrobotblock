@@ -237,4 +237,55 @@ Blockly.Blocks['jazrobot_keep_moving'] = {
     this.setTooltip("Keep the robot moving in the specified direction at the given speed");
     this.setHelpUrl("");
   }
+};
+
+// New timed movement blocks
+Blockly.Blocks['jazrobot_move_timed'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Move")
+        .appendField(new Blockly.FieldDropdown([
+          ["Forward", "forward"], 
+          ["Backward", "backward"]
+        ]), "DIRECTION");
+    this.appendValueInput("SECONDS")
+        .setCheck("Number")
+        .appendField("for");
+    this.appendDummyInput()
+        .appendField("seconds");
+    this.appendValueInput("SPEED")
+        .setCheck("Number")
+        .appendField("at speed");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setColour("#7289DA");
+    this.setTooltip("Move the robot forward or backward for a specific time at the given speed");
+    this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['jazrobot_turn_timed'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Turn")
+        .appendField(new Blockly.FieldDropdown([
+          ["Left", "left"], 
+          ["Right", "right"]
+        ]), "DIRECTION");
+    this.appendValueInput("SECONDS")
+        .setCheck("Number")
+        .appendField("for");
+    this.appendDummyInput()
+        .appendField("seconds");
+    this.appendValueInput("SPEED")
+        .setCheck("Number")
+        .appendField("at speed");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setColour("#7289DA");
+    this.setTooltip("Turn the robot left or right for a specific time at the given speed");
+    this.setHelpUrl("");
+  }
 }; 

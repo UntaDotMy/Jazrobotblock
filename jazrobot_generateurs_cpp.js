@@ -251,64 +251,157 @@ Blockly.Arduino['jazrobot_keep_moving'] = function(block) {
     '  ledcSetup(0, 5000, 8);\n' +
     '  ledcAttachPin(27, 0);\n';
   
-  // Generate movement code for loop
   var code = '';
-  switch(direction) {
-    case 'forward':
-      code += '// Keep moving forward\n';
-      code += 'ledcWrite(0, ' + speed + ');\n';
-      code += 'ledcWrite(0, ' + speed + ');\n';
-      code += 'pinMode(12, OUTPUT);\n';
-      code += 'digitalWrite(12, 1);\n';
-      code += 'pinMode(14, OUTPUT);\n';
-      code += 'digitalWrite(14, 0);\n';
-      code += 'pinMode(26, OUTPUT);\n';
-      code += 'digitalWrite(26, 1);\n';
-      code += 'pinMode(25, OUTPUT);\n';
-      code += 'digitalWrite(25, 0);\n';
-      break;
-      
-    case 'backward':
-      code += '// Keep moving backward\n';
-      code += 'ledcWrite(0, ' + speed + ');\n';
-      code += 'ledcWrite(0, ' + speed + ');\n';
-      code += 'pinMode(12, OUTPUT);\n';
-      code += 'digitalWrite(12, 0);\n';
-      code += 'pinMode(14, OUTPUT);\n';
-      code += 'digitalWrite(14, 1);\n';
-      code += 'pinMode(26, OUTPUT);\n';
-      code += 'digitalWrite(26, 0);\n';
-      code += 'pinMode(25, OUTPUT);\n';
-      code += 'digitalWrite(25, 1);\n';
-      break;
-      
-    case 'right':
-      code += '// Keep turning right\n';
-      code += 'ledcWrite(0, ' + speed + ');\n';
-      code += 'ledcWrite(0, ' + speed + ');\n';
-      code += 'pinMode(12, OUTPUT);\n';
-      code += 'digitalWrite(12, 0);\n';
-      code += 'pinMode(14, OUTPUT);\n';
-      code += 'digitalWrite(14, 1);\n';
-      code += 'pinMode(26, OUTPUT);\n';
-      code += 'digitalWrite(26, 1);\n';
-      code += 'pinMode(25, OUTPUT);\n';
-      code += 'digitalWrite(25, 0);\n';
-      break;
-      
-    case 'left':
-      code += '// Keep turning left\n';
-      code += 'ledcWrite(0, ' + speed + ');\n';
-      code += 'ledcWrite(0, ' + speed + ');\n';
-      code += 'pinMode(12, OUTPUT);\n';
-      code += 'digitalWrite(12, 1);\n';
-      code += 'pinMode(14, OUTPUT);\n';
-      code += 'digitalWrite(14, 0);\n';
-      code += 'pinMode(26, OUTPUT);\n';
-      code += 'digitalWrite(26, 0);\n';
-      code += 'pinMode(25, OUTPUT);\n';
-      code += 'digitalWrite(25, 1);\n';
-      break;
+  
+  if (direction === 'forward') {
+    code += '// Keep moving forward\n';
+    code += 'ledcWrite(0, ' + speed + ');\n';
+    code += 'ledcWrite(0, ' + speed + ');\n';
+    code += 'pinMode(12, OUTPUT);\n';
+    code += 'digitalWrite(12, 1);\n';
+    code += 'pinMode(14, OUTPUT);\n';
+    code += 'digitalWrite(14, 0);\n';
+    code += 'pinMode(26, OUTPUT);\n';
+    code += 'digitalWrite(26, 1);\n';
+    code += 'pinMode(25, OUTPUT);\n';
+    code += 'digitalWrite(25, 0);\n';
+  } else if (direction === 'backward') {
+    code += '// Keep moving backward\n';
+    code += 'ledcWrite(0, ' + speed + ');\n';
+    code += 'ledcWrite(0, ' + speed + ');\n';
+    code += 'pinMode(12, OUTPUT);\n';
+    code += 'digitalWrite(12, 0);\n';
+    code += 'pinMode(14, OUTPUT);\n';
+    code += 'digitalWrite(14, 1);\n';
+    code += 'pinMode(26, OUTPUT);\n';
+    code += 'digitalWrite(26, 0);\n';
+    code += 'pinMode(25, OUTPUT);\n';
+    code += 'digitalWrite(25, 1);\n';
+  } else if (direction === 'right') {
+    code += '// Keep turning right\n';
+    code += 'ledcWrite(0, ' + speed + ');\n';
+    code += 'ledcWrite(0, ' + speed + ');\n';
+    code += 'pinMode(12, OUTPUT);\n';
+    code += 'digitalWrite(12, 0);\n';
+    code += 'pinMode(14, OUTPUT);\n';
+    code += 'digitalWrite(14, 1);\n';
+    code += 'pinMode(26, OUTPUT);\n';
+    code += 'digitalWrite(26, 1);\n';
+    code += 'pinMode(25, OUTPUT);\n';
+    code += 'digitalWrite(25, 0);\n';
+  } else if (direction === 'left') {
+    code += '// Keep turning left\n';
+    code += 'ledcWrite(0, ' + speed + ');\n';
+    code += 'ledcWrite(0, ' + speed + ');\n';
+    code += 'pinMode(12, OUTPUT);\n';
+    code += 'digitalWrite(12, 1);\n';
+    code += 'pinMode(14, OUTPUT);\n';
+    code += 'digitalWrite(14, 0);\n';
+    code += 'pinMode(26, OUTPUT);\n';
+    code += 'digitalWrite(26, 0);\n';
+    code += 'pinMode(25, OUTPUT);\n';
+    code += 'digitalWrite(25, 1);\n';
+  }
+  
+  return code;
+};
+
+// New generators for timed movement blocks
+Blockly.Arduino['jazrobot_move_timed'] = function(block) {
+  var direction = block.getFieldValue('DIRECTION');
+  var seconds = Blockly.Arduino.valueToCode(block, 'SECONDS', Blockly.Arduino.ORDER_ATOMIC) || '1';
+  var speed = Blockly.Arduino.valueToCode(block, 'SPEED', Blockly.Arduino.ORDER_ATOMIC) || '200';
+  var code = '';
+  
+  // Add initialization code
+  code += '// Initialize PWM\n';
+  code += 'ledcSetup(0, 5000, 8);\n';
+  code += 'ledcAttachPin(13, 0);\n';
+  code += 'ledcSetup(0, 5000, 8);\n';
+  code += 'ledcAttachPin(27, 0);\n\n';
+  
+  if (direction === 'forward') {
+    code += '// Move forward with timed duration\n';
+    code += 'ledcWrite(0, ' + speed + ');\n';
+    code += 'ledcWrite(0, ' + speed + ');\n';
+    code += 'pinMode(12, OUTPUT);\n';
+    code += 'digitalWrite(12, 1);\n';
+    code += 'pinMode(14, OUTPUT);\n';
+    code += 'digitalWrite(14, 0);\n';
+    code += 'pinMode(26, OUTPUT);\n';
+    code += 'digitalWrite(26, 1);\n';
+    code += 'pinMode(25, OUTPUT);\n';
+    code += 'digitalWrite(25, 0);\n';
+    code += 'delay(' + seconds + ' * 1000);\n';
+    code += '// Stop after specified time\n';
+    code += 'ledcWrite(0, 0);\n';
+    code += 'ledcWrite(0, 0);\n';
+  } else if (direction === 'backward') {
+    code += '// Move backward with timed duration\n';
+    code += 'ledcWrite(0, ' + speed + ');\n';
+    code += 'ledcWrite(0, ' + speed + ');\n';
+    code += 'pinMode(12, OUTPUT);\n';
+    code += 'digitalWrite(12, 0);\n';
+    code += 'pinMode(14, OUTPUT);\n';
+    code += 'digitalWrite(14, 1);\n';
+    code += 'pinMode(26, OUTPUT);\n';
+    code += 'digitalWrite(26, 0);\n';
+    code += 'pinMode(25, OUTPUT);\n';
+    code += 'digitalWrite(25, 1);\n';
+    code += 'delay(' + seconds + ' * 1000);\n';
+    code += '// Stop after specified time\n';
+    code += 'ledcWrite(0, 0);\n';
+    code += 'ledcWrite(0, 0);\n';
+  }
+  
+  return code;
+};
+
+Blockly.Arduino['jazrobot_turn_timed'] = function(block) {
+  var direction = block.getFieldValue('DIRECTION');
+  var seconds = Blockly.Arduino.valueToCode(block, 'SECONDS', Blockly.Arduino.ORDER_ATOMIC) || '1';
+  var speed = Blockly.Arduino.valueToCode(block, 'SPEED', Blockly.Arduino.ORDER_ATOMIC) || '200';
+  var code = '';
+  
+  // Add initialization code
+  code += '// Initialize PWM\n';
+  code += 'ledcSetup(0, 5000, 8);\n';
+  code += 'ledcAttachPin(13, 0);\n';
+  code += 'ledcSetup(0, 5000, 8);\n';
+  code += 'ledcAttachPin(27, 0);\n\n';
+  
+  if (direction === 'right') {
+    code += '// Turn right with timed duration\n';
+    code += 'ledcWrite(0, ' + speed + ');\n';
+    code += 'ledcWrite(0, ' + speed + ');\n';
+    code += 'pinMode(12, OUTPUT);\n';
+    code += 'digitalWrite(12, 0);\n';
+    code += 'pinMode(14, OUTPUT);\n';
+    code += 'digitalWrite(14, 1);\n';
+    code += 'pinMode(26, OUTPUT);\n';
+    code += 'digitalWrite(26, 1);\n';
+    code += 'pinMode(25, OUTPUT);\n';
+    code += 'digitalWrite(25, 0);\n';
+    code += 'delay(' + seconds + ' * 1000);\n';
+    code += '// Stop after specified time\n';
+    code += 'ledcWrite(0, 0);\n';
+    code += 'ledcWrite(0, 0);\n';
+  } else if (direction === 'left') {
+    code += '// Turn left with timed duration\n';
+    code += 'ledcWrite(0, ' + speed + ');\n';
+    code += 'ledcWrite(0, ' + speed + ');\n';
+    code += 'pinMode(12, OUTPUT);\n';
+    code += 'digitalWrite(12, 1);\n';
+    code += 'pinMode(14, OUTPUT);\n';
+    code += 'digitalWrite(14, 0);\n';
+    code += 'pinMode(26, OUTPUT);\n';
+    code += 'digitalWrite(26, 0);\n';
+    code += 'pinMode(25, OUTPUT);\n';
+    code += 'digitalWrite(25, 1);\n';
+    code += 'delay(' + seconds + ' * 1000);\n';
+    code += '// Stop after specified time\n';
+    code += 'ledcWrite(0, 0);\n';
+    code += 'ledcWrite(0, 0);\n';
   }
   
   return code;
