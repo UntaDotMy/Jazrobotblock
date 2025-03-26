@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolbox>
+ 
+   <parametre id="defaultCategories1">START,CONTROL,MOVE</parametre>
+
+   <category name="START" colour="#FF6680">
+      <block type="jazrobot_start"></block>
+   </category>
+
+   <category name="CONTROL" colour="#5CA65C">
+      <block type="jazrobot_wait">
+         <value name="TIME">
+            <shadow type="math_number">
+               <field name="NUM">1</field>
+            </shadow>
+         </value>
+      </block>
+      
+      <block type="jazrobot_repeat">
+         <value name="TIMES">
+            <shadow type="math_number">
+               <field name="NUM">10</field>
+            </shadow>
+         </value>
+      </block>
+      
+      <block type="jazrobot_forever"></block>
+      
+      <block type="jazrobot_if">
+         <value name="CONDITION">
+            <shadow type="logic_boolean">
+               <field name="BOOL">TRUE</field>
+            </shadow>
+         </value>
+      </block>
+      
+      <block type="jazrobot_if_else">
+         <value name="CONDITION">
+            <shadow type="logic_boolean">
+               <field name="BOOL">TRUE</field>
+            </shadow>
+         </value>
+      </block>
+      
+      <block type="jazrobot_wait_until">
+         <value name="CONDITION">
+            <shadow type="logic_boolean">
+               <field name="BOOL">TRUE</field>
+            </shadow>
+         </value>
+      </block>
+      
+      <block type="jazrobot_repeat_until">
+         <value name="CONDITION">
+            <shadow type="logic_boolean">
+               <field name="BOOL">TRUE</field>
+            </shadow>
+         </value>
+      </block>
+   </category>
+
+   <category name="MOVE" colour="#7289DA">
+      <block type="jazrobot_keep_moving">
+         <field name="DIRECTION">forward</field>
+         <value name="SPEED">
+            <shadow type="math_number">
+               <field name="NUM">200</field>
+            </shadow>
+         </value>
+      </block>
+      
+      <block type="jazrobot_move_preset">
+         <field name="DIRECTION">forward</field>
+      </block>
+      
+      <block type="jazrobot_move_custom">
+         <field name="DIRECTION">forward</field>
+         <value name="SPEED">
+            <shadow type="math_number">
+               <field name="NUM">200</field>
+            </shadow>
+         </value>
+      </block>
+      
+      <block type="jazrobot_turn_preset">
+         <field name="DIRECTION">right</field>
+      </block>
+      
+      <block type="jazrobot_turn_custom">
+         <field name="DIRECTION">right</field>
+         <value name="SPEED">
+            <shadow type="math_number">
+               <field name="NUM">200</field>
+            </shadow>
+         </value>
+      </block>
+   </category>
+</toolbox> 
