@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <toolbox>
  
-   <parametre id="defaultCategories1">START,CONTROL,MOVE,SHOW</parametre>
+   <parametre id="defaultCategories1">START,CONTROL,MOVE,SHOW,AUDIO</parametre>
 
    <category name="START" colour="#FF6680">
       <block type="jazrobot_start"></block>
@@ -139,5 +139,38 @@
       </block>
       
       <block type="jazrobot_led_off"></block>
+   </category>
+   
+   <category name="AUDIO" colour="#9B59B6">
+      <block type="jazrobot_play_tone">
+         <field name="OCTAVE">261.6</field>
+         <field name="NOTE">1</field>
+         <value name="DURATION">
+            <shadow type="math_number">
+               <field name="NUM">500</field>
+            </shadow>
+         </value>
+      </block>
+      
+      <block type="jazrobot_play_note">
+         <field name="NOTE">262</field>
+         <value name="DURATION">
+            <shadow type="math_number">
+               <field name="NUM">500</field>
+            </shadow>
+         </value>
+      </block>
+      
+      <block type="jazrobot_stop_tone"></block>
+      <sep></sep>
+      <block type="jazrobot_play_rtttl">
+         <field name="SONG">StarWars</field>
+         <value name="DURATION">
+            <shadow type="math_number">
+               <field name="NUM">5000</field>
+            </shadow>
+         </value>
+      </block>
+      <block type="jazrobot_stop_music"></block>
    </category>
 </toolbox> 

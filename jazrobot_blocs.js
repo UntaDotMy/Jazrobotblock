@@ -344,4 +344,128 @@ Blockly.Blocks['jazrobot_led_off'] = {
     this.setTooltip("Turn off all LEDs");
     this.setHelpUrl("");
   }
+};
+
+// Audio/Buzzer blocks
+Blockly.Blocks['jazrobot_play_tone'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Play tone with octave")
+        .appendField(new Blockly.FieldDropdown([
+          ["Very Low (2)", "65.4"], 
+          ["Low (3)", "130.8"],
+          ["Medium (4)", "261.6"],
+          ["High (5)", "523.2"],
+          ["Very High (6)", "1046.5"]
+        ]), "OCTAVE");
+    this.appendDummyInput()
+        .appendField("note")
+        .appendField(new Blockly.FieldDropdown([
+          ["C", "1"], 
+          ["C#/Db", "1.059"],
+          ["D", "1.122"],
+          ["D#/Eb", "1.189"],
+          ["E", "1.26"],
+          ["F", "1.335"],
+          ["F#/Gb", "1.414"],
+          ["G", "1.498"],
+          ["G#/Ab", "1.587"],
+          ["A", "1.682"],
+          ["A#/Bb", "1.782"],
+          ["B", "1.888"]
+        ]), "NOTE");
+    this.appendValueInput("DURATION")
+        .setCheck("Number")
+        .appendField("duration (ms)");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setColour("#9B59B6");
+    this.setTooltip("Play a tone at specified octave and note for specified duration");
+    this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['jazrobot_play_note'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Play note")
+        .appendField(new Blockly.FieldDropdown([
+          ["C3 (Low C)", "131"],
+          ["C4 (Middle C)", "262"],
+          ["E4", "330"],
+          ["G4", "392"],
+          ["C5 (High C)", "523"],
+          ["E5", "659"],
+          ["G5", "784"],
+          ["C6 (Very High C)", "1047"]
+        ]), "NOTE");
+    this.appendValueInput("DURATION")
+        .setCheck("Number")
+        .appendField("duration (ms)");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setColour("#9B59B6");
+    this.setTooltip("Play a musical note for specified duration");
+    this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['jazrobot_stop_tone'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Stop tone");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.setColour("#9B59B6");
+    this.setTooltip("Stop playing any tone");
+    this.setHelpUrl("");
+  }
+};
+
+// RTTTL Music blocks
+Blockly.Blocks['jazrobot_play_rtttl'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Play song")
+        .appendField(new Blockly.FieldDropdown([
+          ["Star Wars", "StarWars"], 
+          ["Mission Impossible", "MissionImp"],
+          ["Super Mario", "SuperMario"],
+          ["Pink Panther", "PinkPanther"],
+          ["The Entertainer", "Entertainer"],
+          ["Take On Me", "TakeOnMe"],
+          ["The Muppets", "Muppets"],
+          ["Indiana Jones", "Indiana"],
+          ["Jingle Bells", "JingleBell"],
+          ["Silent Night", "SilentNight"],
+          ["Amazing Grace", "AmazingGrace"]
+        ]), "SONG");
+    this.appendValueInput("DURATION")
+        .setCheck("Number")
+        .appendField("for");
+    this.appendDummyInput()
+        .appendField("milliseconds");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour("#9B59B6");
+    this.setTooltip("Play a selected RTTTL song for a specific duration in milliseconds");
+    this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['jazrobot_stop_music'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Stop music");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour("#9B59B6");
+    this.setTooltip("Stop any currently playing RTTTL song");
+    this.setHelpUrl("");
+  }
 }; 
