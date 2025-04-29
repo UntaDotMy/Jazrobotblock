@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 
 goog.provide('Blockly.Arduino');
 goog.require('Blockly.Generator');

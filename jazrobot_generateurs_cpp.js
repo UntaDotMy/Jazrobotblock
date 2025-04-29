@@ -1,16 +1,20 @@
 Blockly.Arduino['jazrobot_start'] = function(block) {
+  // Ensure Arduino.h is included first
+  Blockly.Arduino.definitions_['define_arduino_h'] = '#include <Arduino.h>';
+
+  // Process SETUP input for void setup()
   var setupCode = Blockly.Arduino.statementToCode(block, 'SETUP') || '';
-  
-  // Initialize includes and variables
-  Blockly.Arduino.definitions_['define_serial'] = '#include <Arduino.h>';
-  
-  // Generate setup function
-  Blockly.Arduino.setups_['setup_serial'] = 'Serial.begin(115200);';
+  Blockly.Arduino.setups_['setup_serial'] = 'Serial.begin(115200);'; // Ensure Serial is always set up
   if (setupCode) {
+    // Add user's setup code AFTER basic setup like Serial
     Blockly.Arduino.setups_['setup_custom'] = setupCode;
   }
+
+  // Process LOOP input for void loop()
+  var loopCode = Blockly.Arduino.statementToCode(block, 'LOOP') || '';
   
-  return '';
+  // Return the loop code. The ArduBlock system wraps this in void loop() { ... }
+  return loopCode;
 };
 
 Blockly.Arduino['jazrobot_wait'] = function(block) {
@@ -24,17 +28,6 @@ Blockly.Arduino['jazrobot_repeat'] = function(block) {
   var code = '';
   
   code += 'for (int count = 0; count < ' + times + '; count++) {\n';
-  code += branch;
-  code += '}\n';
-  
-  return code;
-};
-
-Blockly.Arduino['jazrobot_forever'] = function(block) {
-  var branch = Blockly.Arduino.statementToCode(block, 'DO');
-  var code = '';
-  
-  code += 'while (true) {\n';
   code += branch;
   code += '}\n';
   
@@ -70,239 +63,146 @@ Blockly.Arduino['jazrobot_repeat_until'] = function(block) {
 };
 
 Blockly.Arduino['jazrobot_init'] = function(block) {
-  var code = '// Initialize JazroBot\n';
-  code += 'ledcSetup(0, 5000, 8);\n';
-  code += 'ledcAttachPin(13, 0);\n';
-  code += 'ledcSetup(0, 5000, 8);\n';
-  code += 'ledcAttachPin(27, 0);\n';
-  return code;
+  // Ensure all setups are added if this block is used standalone
+  Blockly.Arduino.setups_['setup_pwm'] = '  // Initialize PWM\n' + 
+    '  ledcSetup(0, 5000, 8); ledcAttachPin(13, 0);\n' + 
+    '  ledcSetup(1, 5000, 8); ledcAttachPin(27, 1);\n'; 
+  Blockly.Arduino.setups_['setup_motor_pins'] = '  // Setup Motor Driver Pins\n' +
+    '  pinMode(12, OUTPUT); pinMode(14, OUTPUT);\n' +
+    '  pinMode(26, OUTPUT); pinMode(25, OUTPUT);\n';
+  return '// JazroBot Initialized (PWM & Motor Pins Setup)\n';
 };
+
+// Function to ensure motor pin setup is added
+function ensureMotorPinSetup() {
+  // Check if already defined to avoid duplicate setup code
+  if (!Blockly.Arduino.setups_['setup_motor_pins']) {
+      Blockly.Arduino.setups_['setup_motor_pins'] = '  // Setup Motor Driver Pins\n' +
+        '  pinMode(12, OUTPUT); pinMode(14, OUTPUT);\n' +
+        '  pinMode(26, OUTPUT); pinMode(25, OUTPUT);\n';
+  }
+}
+
+// Function to ensure PWM setup is added
+function ensurePwmSetup() {
+  // Check if already defined
+  if (!Blockly.Arduino.setups_['setup_pwm']) {
+      Blockly.Arduino.setups_['setup_pwm'] = '  // Initialize PWM\n' + 
+        '  ledcSetup(0, 5000, 8); ledcAttachPin(13, 0);\n' + 
+        '  ledcSetup(1, 5000, 8); ledcAttachPin(27, 1);\n'; 
+   }
+}
 
 Blockly.Arduino['jazrobot_move_preset'] = function(block) {
   var direction = block.getFieldValue('DIRECTION');
+  ensurePwmSetup();
+  ensureMotorPinSetup();
   var code = '';
-  
-  // Add initialization code
-  code += '// Initialize PWM\n';
-  code += 'ledcSetup(0, 5000, 8);\n';
-  code += 'ledcAttachPin(13, 0);\n';
-  code += 'ledcSetup(0, 5000, 8);\n';
-  code += 'ledcAttachPin(27, 0);\n\n';
-  
+
   if (direction === 'forward') {
     code += '// Move forward\n';
-    code += 'ledcWrite(0, 200);\n';
-    code += 'ledcWrite(0, 200);\n';
-    code += 'pinMode(12, OUTPUT);\n';
-    code += 'digitalWrite(12, 1);\n';
-    code += 'pinMode(14, OUTPUT);\n';
-    code += 'digitalWrite(14, 0);\n';
-    code += 'pinMode(26, OUTPUT);\n';
-    code += 'digitalWrite(26, 1);\n';
-    code += 'pinMode(25, OUTPUT);\n';
-    code += 'digitalWrite(25, 0);\n';
+    code += 'ledcWrite(0, 200); ledcWrite(1, 200);\n'; 
+    code += 'digitalWrite(12, 1); digitalWrite(14, 0);\n'; 
+    code += 'digitalWrite(26, 1); digitalWrite(25, 0);\n'; 
   } else if (direction === 'backward') {
     code += '// Move backward\n';
-    code += 'ledcWrite(0, 200);\n';
-    code += 'ledcWrite(0, 200);\n';
-    code += 'pinMode(12, OUTPUT);\n';
-    code += 'digitalWrite(12, 0);\n';
-    code += 'pinMode(14, OUTPUT);\n';
-    code += 'digitalWrite(14, 1);\n';
-    code += 'pinMode(26, OUTPUT);\n';
-    code += 'digitalWrite(26, 0);\n';
-    code += 'pinMode(25, OUTPUT);\n';
-    code += 'digitalWrite(25, 1);\n';
+    code += 'ledcWrite(0, 200); ledcWrite(1, 200);\n'; 
+    code += 'digitalWrite(12, 0); digitalWrite(14, 1);\n'; 
+    code += 'digitalWrite(26, 0); digitalWrite(25, 1);\n'; 
   }
-  
   return code;
 };
 
 Blockly.Arduino['jazrobot_move_custom'] = function(block) {
   var direction = block.getFieldValue('DIRECTION');
   var speed = Blockly.Arduino.valueToCode(block, 'SPEED', Blockly.Arduino.ORDER_ATOMIC) || '200';
+  ensurePwmSetup();
+  ensureMotorPinSetup();
   var code = '';
-  
-  // Add initialization code
-  code += '// Initialize PWM\n';
-  code += 'ledcSetup(0, 5000, 8);\n';
-  code += 'ledcAttachPin(13, 0);\n';
-  code += 'ledcSetup(0, 5000, 8);\n';
-  code += 'ledcAttachPin(27, 0);\n\n';
-  
+
   if (direction === 'forward') {
     code += '// Move forward with custom speed\n';
-    code += 'ledcWrite(0, ' + speed + ');\n';
-    code += 'ledcWrite(0, ' + speed + ');\n';
-    code += 'pinMode(12, OUTPUT);\n';
-    code += 'digitalWrite(12, 1);\n';
-    code += 'pinMode(14, OUTPUT);\n';
-    code += 'digitalWrite(14, 0);\n';
-    code += 'pinMode(26, OUTPUT);\n';
-    code += 'digitalWrite(26, 1);\n';
-    code += 'pinMode(25, OUTPUT);\n';
-    code += 'digitalWrite(25, 0);\n';
+    code += 'ledcWrite(0, ' + speed + '); ledcWrite(1, ' + speed + ');\n'; 
+    code += 'digitalWrite(12, 1); digitalWrite(14, 0);\n'; 
+    code += 'digitalWrite(26, 1); digitalWrite(25, 0);\n'; 
   } else if (direction === 'backward') {
     code += '// Move backward with custom speed\n';
-    code += 'ledcWrite(0, ' + speed + ');\n';
-    code += 'ledcWrite(0, ' + speed + ');\n';
-    code += 'pinMode(12, OUTPUT);\n';
-    code += 'digitalWrite(12, 0);\n';
-    code += 'pinMode(14, OUTPUT);\n';
-    code += 'digitalWrite(14, 1);\n';
-    code += 'pinMode(26, OUTPUT);\n';
-    code += 'digitalWrite(26, 0);\n';
-    code += 'pinMode(25, OUTPUT);\n';
-    code += 'digitalWrite(25, 1);\n';
+    code += 'ledcWrite(0, ' + speed + '); ledcWrite(1, ' + speed + ');\n';
+    code += 'digitalWrite(12, 0); digitalWrite(14, 1);\n'; 
+    code += 'digitalWrite(26, 0); digitalWrite(25, 1);\n'; 
   }
-  
   return code;
 };
 
 Blockly.Arduino['jazrobot_turn_preset'] = function(block) {
   var direction = block.getFieldValue('DIRECTION');
+  ensurePwmSetup();
+  ensureMotorPinSetup();
   var code = '';
-  
-  // Add initialization code
-  code += '// Initialize PWM\n';
-  code += 'ledcSetup(0, 5000, 8);\n';
-  code += 'ledcAttachPin(13, 0);\n';
-  code += 'ledcSetup(0, 5000, 8);\n';
-  code += 'ledcAttachPin(27, 0);\n\n';
-  
+
   if (direction === 'right') {
     code += '// Turn right\n';
-    code += 'ledcWrite(0, 200);\n';
-    code += 'ledcWrite(0, 200);\n';
-    code += 'pinMode(12, OUTPUT);\n';
-    code += 'digitalWrite(12, 0);\n';
-    code += 'pinMode(14, OUTPUT);\n';
-    code += 'digitalWrite(14, 1);\n';
-    code += 'pinMode(26, OUTPUT);\n';
-    code += 'digitalWrite(26, 1);\n';
-    code += 'pinMode(25, OUTPUT);\n';
-    code += 'digitalWrite(25, 0);\n';
+    code += 'ledcWrite(0, 200); ledcWrite(1, 200);\n'; 
+    code += 'digitalWrite(12, 0); digitalWrite(14, 1);\n'; // Motor A backwards
+    code += 'digitalWrite(26, 1); digitalWrite(25, 0);\n'; // Motor B forwards
   } else if (direction === 'left') {
     code += '// Turn left\n';
-    code += 'ledcWrite(0, 200);\n';
-    code += 'ledcWrite(0, 200);\n';
-    code += 'pinMode(12, OUTPUT);\n';
-    code += 'digitalWrite(12, 1);\n';
-    code += 'pinMode(14, OUTPUT);\n';
-    code += 'digitalWrite(14, 0);\n';
-    code += 'pinMode(26, OUTPUT);\n';
-    code += 'digitalWrite(26, 0);\n';
-    code += 'pinMode(25, OUTPUT);\n';
-    code += 'digitalWrite(25, 1);\n';
+    code += 'ledcWrite(0, 200); ledcWrite(1, 200);\n'; 
+    code += 'digitalWrite(12, 1); digitalWrite(14, 0);\n'; // Motor A forwards
+    code += 'digitalWrite(26, 0); digitalWrite(25, 1);\n'; // Motor B backwards
   }
-  
   return code;
 };
 
 Blockly.Arduino['jazrobot_turn_custom'] = function(block) {
   var direction = block.getFieldValue('DIRECTION');
   var speed = Blockly.Arduino.valueToCode(block, 'SPEED', Blockly.Arduino.ORDER_ATOMIC) || '200';
+  ensurePwmSetup();
+  ensureMotorPinSetup();
   var code = '';
-  
-  // Add initialization code
-  code += '// Initialize PWM\n';
-  code += 'ledcSetup(0, 5000, 8);\n';
-  code += 'ledcAttachPin(13, 0);\n';
-  code += 'ledcSetup(0, 5000, 8);\n';
-  code += 'ledcAttachPin(27, 0);\n\n';
   
   if (direction === 'right') {
     code += '// Turn right with custom speed\n';
-    code += 'ledcWrite(0, ' + speed + ');\n';
-    code += 'ledcWrite(0, ' + speed + ');\n';
-    code += 'pinMode(12, OUTPUT);\n';
-    code += 'digitalWrite(12, 0);\n';
-    code += 'pinMode(14, OUTPUT);\n';
-    code += 'digitalWrite(14, 1);\n';
-    code += 'pinMode(26, OUTPUT);\n';
-    code += 'digitalWrite(26, 1);\n';
-    code += 'pinMode(25, OUTPUT);\n';
-    code += 'digitalWrite(25, 0);\n';
+    code += 'ledcWrite(0, ' + speed + '); ledcWrite(1, ' + speed + ');\n';
+    code += 'digitalWrite(12, 0); digitalWrite(14, 1);\n'; 
+    code += 'digitalWrite(26, 1); digitalWrite(25, 0);\n'; 
   } else if (direction === 'left') {
     code += '// Turn left with custom speed\n';
-    code += 'ledcWrite(0, ' + speed + ');\n';
-    code += 'ledcWrite(0, ' + speed + ');\n';
-    code += 'pinMode(12, OUTPUT);\n';
-    code += 'digitalWrite(12, 1);\n';
-    code += 'pinMode(14, OUTPUT);\n';
-    code += 'digitalWrite(14, 0);\n';
-    code += 'pinMode(26, OUTPUT);\n';
-    code += 'digitalWrite(26, 0);\n';
-    code += 'pinMode(25, OUTPUT);\n';
-    code += 'digitalWrite(25, 1);\n';
+    code += 'ledcWrite(0, ' + speed + '); ledcWrite(1, ' + speed + ');\n'; 
+    code += 'digitalWrite(12, 1); digitalWrite(14, 0);\n'; 
+    code += 'digitalWrite(26, 0); digitalWrite(25, 1);\n'; 
   }
-  
   return code;
 };
 
 Blockly.Arduino['jazrobot_keep_moving'] = function(block) {
   var direction = block.getFieldValue('DIRECTION');
   var speed = Blockly.Arduino.valueToCode(block, 'SPEED', Blockly.Arduino.ORDER_ATOMIC) || '200';
-  
-  // Put initialization code in setup
-  Blockly.Arduino.setups_['setup_pwm'] = '  // Initialize PWM\n' +
-    '  ledcSetup(0, 5000, 8);\n' +
-    '  ledcAttachPin(13, 0);\n' +
-    '  ledcSetup(0, 5000, 8);\n' +
-    '  ledcAttachPin(27, 0);\n';
-  
+  ensurePwmSetup();
+  ensureMotorPinSetup();
   var code = '';
   
   if (direction === 'forward') {
     code += '// Keep moving forward\n';
-    code += 'ledcWrite(0, ' + speed + ');\n';
-    code += 'ledcWrite(0, ' + speed + ');\n';
-    code += 'pinMode(12, OUTPUT);\n';
-    code += 'digitalWrite(12, 1);\n';
-    code += 'pinMode(14, OUTPUT);\n';
-    code += 'digitalWrite(14, 0);\n';
-    code += 'pinMode(26, OUTPUT);\n';
-    code += 'digitalWrite(26, 1);\n';
-    code += 'pinMode(25, OUTPUT);\n';
-    code += 'digitalWrite(25, 0);\n';
+    code += 'ledcWrite(0, ' + speed + '); ledcWrite(1, ' + speed + ');\n';
+    code += 'digitalWrite(12, 1); digitalWrite(14, 0);\n';
+    code += 'digitalWrite(26, 1); digitalWrite(25, 0);\n';
   } else if (direction === 'backward') {
     code += '// Keep moving backward\n';
-    code += 'ledcWrite(0, ' + speed + ');\n';
-    code += 'ledcWrite(0, ' + speed + ');\n';
-    code += 'pinMode(12, OUTPUT);\n';
-    code += 'digitalWrite(12, 0);\n';
-    code += 'pinMode(14, OUTPUT);\n';
-    code += 'digitalWrite(14, 1);\n';
-    code += 'pinMode(26, OUTPUT);\n';
-    code += 'digitalWrite(26, 0);\n';
-    code += 'pinMode(25, OUTPUT);\n';
-    code += 'digitalWrite(25, 1);\n';
+    code += 'ledcWrite(0, ' + speed + '); ledcWrite(1, ' + speed + ');\n';
+    code += 'digitalWrite(12, 0); digitalWrite(14, 1);\n';
+    code += 'digitalWrite(26, 0); digitalWrite(25, 1);\n';
   } else if (direction === 'right') {
     code += '// Keep turning right\n';
-    code += 'ledcWrite(0, ' + speed + ');\n';
-    code += 'ledcWrite(0, ' + speed + ');\n';
-    code += 'pinMode(12, OUTPUT);\n';
-    code += 'digitalWrite(12, 0);\n';
-    code += 'pinMode(14, OUTPUT);\n';
-    code += 'digitalWrite(14, 1);\n';
-    code += 'pinMode(26, OUTPUT);\n';
-    code += 'digitalWrite(26, 1);\n';
-    code += 'pinMode(25, OUTPUT);\n';
-    code += 'digitalWrite(25, 0);\n';
+    code += 'ledcWrite(0, ' + speed + '); ledcWrite(1, ' + speed + ');\n';
+    code += 'digitalWrite(12, 0); digitalWrite(14, 1);\n';
+    code += 'digitalWrite(26, 1); digitalWrite(25, 0);\n';
   } else if (direction === 'left') {
     code += '// Keep turning left\n';
-    code += 'ledcWrite(0, ' + speed + ');\n';
-    code += 'ledcWrite(0, ' + speed + ');\n';
-    code += 'pinMode(12, OUTPUT);\n';
-    code += 'digitalWrite(12, 1);\n';
-    code += 'pinMode(14, OUTPUT);\n';
-    code += 'digitalWrite(14, 0);\n';
-    code += 'pinMode(26, OUTPUT);\n';
-    code += 'digitalWrite(26, 0);\n';
-    code += 'pinMode(25, OUTPUT);\n';
-    code += 'digitalWrite(25, 1);\n';
+    code += 'ledcWrite(0, ' + speed + '); ledcWrite(1, ' + speed + ');\n';
+    code += 'digitalWrite(12, 1); digitalWrite(14, 0);\n';
+    code += 'digitalWrite(26, 0); digitalWrite(25, 1);\n';
   }
-  
   return code;
 };
 
@@ -311,49 +211,33 @@ Blockly.Arduino['jazrobot_move_timed'] = function(block) {
   var direction = block.getFieldValue('DIRECTION');
   var seconds = Blockly.Arduino.valueToCode(block, 'SECONDS', Blockly.Arduino.ORDER_ATOMIC) || '1';
   var speed = Blockly.Arduino.valueToCode(block, 'SPEED', Blockly.Arduino.ORDER_ATOMIC) || '200';
+  ensurePwmSetup();
+  ensureMotorPinSetup();
   var code = '';
   
-  // Add initialization code
-  code += '// Initialize PWM\n';
-  code += 'ledcSetup(0, 5000, 8);\n';
-  code += 'ledcAttachPin(13, 0);\n';
-  code += 'ledcSetup(0, 5000, 8);\n';
-  code += 'ledcAttachPin(27, 0);\n\n';
-  
+  // Define stop function 
+  var stopFuncName = 'jazrobot_stop_motors';
+  if (!Blockly.Arduino.definitions_[stopFuncName]) {
+      var stopFunctionCode = 
+        'void ' + stopFuncName + '() {\n' +
+        '  ledcWrite(0, 0); ledcWrite(1, 0);\n' + // Stop both motors
+        '}\n';
+      Blockly.Arduino.definitions_[stopFuncName] = stopFunctionCode;
+  }
+
   if (direction === 'forward') {
     code += '// Move forward with timed duration\n';
-    code += 'ledcWrite(0, ' + speed + ');\n';
-    code += 'ledcWrite(0, ' + speed + ');\n';
-    code += 'pinMode(12, OUTPUT);\n';
-    code += 'digitalWrite(12, 1);\n';
-    code += 'pinMode(14, OUTPUT);\n';
-    code += 'digitalWrite(14, 0);\n';
-    code += 'pinMode(26, OUTPUT);\n';
-    code += 'digitalWrite(26, 1);\n';
-    code += 'pinMode(25, OUTPUT);\n';
-    code += 'digitalWrite(25, 0);\n';
-    code += 'delay(' + seconds + ' * 1000);\n';
-    code += '// Stop after specified time\n';
-    code += 'ledcWrite(0, 0);\n';
-    code += 'ledcWrite(0, 0);\n';
+    code += 'ledcWrite(0, ' + speed + '); ledcWrite(1, ' + speed + ');\n'; 
+    code += 'digitalWrite(12, 1); digitalWrite(14, 0);\n'; 
+    code += 'digitalWrite(26, 1); digitalWrite(25, 0);\n'; 
   } else if (direction === 'backward') {
     code += '// Move backward with timed duration\n';
-    code += 'ledcWrite(0, ' + speed + ');\n';
-    code += 'ledcWrite(0, ' + speed + ');\n';
-    code += 'pinMode(12, OUTPUT);\n';
-    code += 'digitalWrite(12, 0);\n';
-    code += 'pinMode(14, OUTPUT);\n';
-    code += 'digitalWrite(14, 1);\n';
-    code += 'pinMode(26, OUTPUT);\n';
-    code += 'digitalWrite(26, 0);\n';
-    code += 'pinMode(25, OUTPUT);\n';
-    code += 'digitalWrite(25, 1);\n';
-    code += 'delay(' + seconds + ' * 1000);\n';
-    code += '// Stop after specified time\n';
-    code += 'ledcWrite(0, 0);\n';
-    code += 'ledcWrite(0, 0);\n';
+    code += 'ledcWrite(0, ' + speed + '); ledcWrite(1, ' + speed + ');\n'; 
+    code += 'digitalWrite(12, 0); digitalWrite(14, 1);\n'; 
+    code += 'digitalWrite(26, 0); digitalWrite(25, 1);\n'; 
   }
-  
+  code += 'delay(' + seconds + ' * 1000);\n';
+  code += stopFuncName + '(); // Stop after specified time\n';
   return code;
 };
 
@@ -361,49 +245,33 @@ Blockly.Arduino['jazrobot_turn_timed'] = function(block) {
   var direction = block.getFieldValue('DIRECTION');
   var seconds = Blockly.Arduino.valueToCode(block, 'SECONDS', Blockly.Arduino.ORDER_ATOMIC) || '1';
   var speed = Blockly.Arduino.valueToCode(block, 'SPEED', Blockly.Arduino.ORDER_ATOMIC) || '200';
+  ensurePwmSetup();
+  ensureMotorPinSetup();
   var code = '';
-  
-  // Add initialization code
-  code += '// Initialize PWM\n';
-  code += 'ledcSetup(0, 5000, 8);\n';
-  code += 'ledcAttachPin(13, 0);\n';
-  code += 'ledcSetup(0, 5000, 8);\n';
-  code += 'ledcAttachPin(27, 0);\n\n';
-  
+    
+  // Define stop function 
+  var stopFuncName = 'jazrobot_stop_motors';
+  if (!Blockly.Arduino.definitions_[stopFuncName]) {
+      var stopFunctionCode = 
+        'void ' + stopFuncName + '() {\n' +
+        '  ledcWrite(0, 0); ledcWrite(1, 0);\n' + 
+        '}\n';
+      Blockly.Arduino.definitions_[stopFuncName] = stopFunctionCode;
+  }
+
   if (direction === 'right') {
     code += '// Turn right with timed duration\n';
-    code += 'ledcWrite(0, ' + speed + ');\n';
-    code += 'ledcWrite(0, ' + speed + ');\n';
-    code += 'pinMode(12, OUTPUT);\n';
-    code += 'digitalWrite(12, 0);\n';
-    code += 'pinMode(14, OUTPUT);\n';
-    code += 'digitalWrite(14, 1);\n';
-    code += 'pinMode(26, OUTPUT);\n';
-    code += 'digitalWrite(26, 1);\n';
-    code += 'pinMode(25, OUTPUT);\n';
-    code += 'digitalWrite(25, 0);\n';
-    code += 'delay(' + seconds + ' * 1000);\n';
-    code += '// Stop after specified time\n';
-    code += 'ledcWrite(0, 0);\n';
-    code += 'ledcWrite(0, 0);\n';
+    code += 'ledcWrite(0, ' + speed + '); ledcWrite(1, ' + speed + ');\n'; 
+    code += 'digitalWrite(12, 0); digitalWrite(14, 1);\n'; 
+    code += 'digitalWrite(26, 1); digitalWrite(25, 0);\n'; 
   } else if (direction === 'left') {
     code += '// Turn left with timed duration\n';
-    code += 'ledcWrite(0, ' + speed + ');\n';
-    code += 'ledcWrite(0, ' + speed + ');\n';
-    code += 'pinMode(12, OUTPUT);\n';
-    code += 'digitalWrite(12, 1);\n';
-    code += 'pinMode(14, OUTPUT);\n';
-    code += 'digitalWrite(14, 0);\n';
-    code += 'pinMode(26, OUTPUT);\n';
-    code += 'digitalWrite(26, 0);\n';
-    code += 'pinMode(25, OUTPUT);\n';
-    code += 'digitalWrite(25, 1);\n';
-    code += 'delay(' + seconds + ' * 1000);\n';
-    code += '// Stop after specified time\n';
-    code += 'ledcWrite(0, 0);\n';
-    code += 'ledcWrite(0, 0);\n';
+    code += 'ledcWrite(0, ' + speed + '); ledcWrite(1, ' + speed + ');\n'; 
+    code += 'digitalWrite(12, 1); digitalWrite(14, 0);\n'; 
+    code += 'digitalWrite(26, 0); digitalWrite(25, 1);\n'; 
   }
-  
+  code += 'delay(' + seconds + ' * 1000);\n';
+  code += stopFuncName + '(); // Stop after specified time\n';
   return code;
 };
 
@@ -605,4 +473,86 @@ Blockly.Arduino['jazrobot_stop_music'] = function(block) {
   code += 'rtttl::stop();\n';
   
   return code;
-}; 
+};
+
+// Sensor code generators
+Blockly.Arduino['jazrobot_ultrasonic_read'] = function(block) {
+  var trigPin = 18; // Hardcoded Trig pin
+  var echoPin = 4;  // Hardcoded Echo pin
+
+  // Define variables and setup pins using fixed names
+  var definePinKey = 'define_ultrasonic_pins_18_4';
+  var setupPinKey = 'setup_ultrasonic_18_4';
+  var funcName = 'readUltrasonicDistance_18_4';
+
+  Blockly.Arduino.definitions_[definePinKey] = 
+    'const int trigPin_18 = ' + trigPin + ';\n' +
+    'const int echoPin_4 = ' + echoPin + ';';
+
+  Blockly.Arduino.setups_[setupPinKey] = 
+    'pinMode(trigPin_18, OUTPUT);\n' +
+    'pinMode(echoPin_4, INPUT);';
+
+  // Function to read distance
+  var functionCode = 
+    'long ' + funcName + '() {\n' +
+    '  digitalWrite(trigPin_18, LOW);\n' +
+    '  delayMicroseconds(2);\n' +
+    '  digitalWrite(trigPin_18, HIGH);\n' +
+    '  delayMicroseconds(10);\n' +
+    '  digitalWrite(trigPin_18, LOW);\n' +
+    '  long duration = pulseIn(echoPin_4, HIGH);\n' +
+    '  long distance = duration / 58.2;\n' +
+    '  return distance;\n' +
+    '}';
+  Blockly.Arduino.definitions_[funcName] = functionCode;
+
+  // Return the function call
+  return [funcName + '()', Blockly.Arduino.ORDER_ATOMIC];
+};
+
+// Custom Control Logic/Math Generators
+Blockly.Arduino['jazrobot_logic_compare'] = function(block) {
+  // Logic Comparison Operator.
+  var OPERATORS = {
+    'EQ': '==',
+    'NEQ': '!=',
+    'LT': '<',
+    'LTE': '<=',
+    'GT': '>',
+    'GTE': '>='
+  };
+  var operator = OPERATORS[block.getFieldValue('OP')];
+  var order = (operator == '==' || operator == '!=') ?
+      Blockly.Arduino.ORDER_EQUALITY : Blockly.Arduino.ORDER_RELATIONAL;
+  var argument0 = Blockly.Arduino.valueToCode(block, 'A', order) || '0';
+  var argument1 = Blockly.Arduino.valueToCode(block, 'B', order) || '0';
+  var code = argument0 + ' ' + operator + ' ' + argument1;
+  return [code, order];
+};
+
+Blockly.Arduino['jazrobot_math_number'] = function(block) {
+  // Numeric value.
+  var code = parseFloat(block.getFieldValue('NUM'));
+  var order = code < 0 ? Blockly.Arduino.ORDER_UNARY_NEGATION : Blockly.Arduino.ORDER_ATOMIC;
+  return [code, order];
+};
+
+Blockly.Arduino['jazrobot_logic_boolean'] = function(block) {
+  // Boolean values true and false.
+  var code = (block.getFieldValue('BOOL') == 'TRUE') ? 'true' : 'false';
+  return [code, Blockly.Arduino.ORDER_ATOMIC];
+};
+
+Blockly.Arduino['jazrobot_line_follower'] = function(block) {
+  var sensorPin = block.getFieldValue('SENSOR_PIN'); // Will be "33" or "36"
+  var detectColor = block.getFieldValue('DETECT_COLOR'); // Will be "1" or "0"
+
+  // Ensure pin is set to input in setup
+  var setupPinKey = 'setup_line_follower_' + sensorPin;
+  Blockly.Arduino.setups_[setupPinKey] = 'pinMode(' + sensorPin + ', INPUT);';
+  
+  // Generate the condition check
+  var code = 'digitalRead(' + sensorPin + ') == ' + detectColor;
+  return [code, Blockly.Arduino.ORDER_EQUALITY];
+};

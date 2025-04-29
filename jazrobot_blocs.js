@@ -8,10 +8,16 @@ Blockly.Blocks['jazrobot_start'] = {
     this.appendDummyInput()
         .appendField("When JazroBot Start");
     this.appendStatementInput("SETUP")
-        .setCheck(null);
+        .setCheck(null)
+        .appendField("Setup (runs once)");
+    this.appendStatementInput("LOOP")
+        .setCheck(null)
+        .appendField("Loop (runs forever)");
     this.setColour("#FF6680");
-    this.setTooltip("Code here runs once when JazroBot starts");
+    this.setTooltip("Define code for setup (runs once) and the main loop (runs forever)");
     this.setHelpUrl("");
+    this.setDeletable(true);
+    this.setMovable(true);
   }
 };
 
@@ -45,21 +51,6 @@ Blockly.Blocks['jazrobot_repeat'] = {
     this.setNextStatement(true);
     this.setColour("#5CA65C");
     this.setTooltip("Repeat actions a specified number of times");
-    this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['jazrobot_forever'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField("forever");
-    this.appendStatementInput("DO")
-        .setCheck(null)
-        .appendField("do");
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setColour("#5CA65C");
-    this.setTooltip("Repeat actions forever");
     this.setHelpUrl("");
   }
 };
@@ -467,5 +458,98 @@ Blockly.Blocks['jazrobot_stop_music'] = {
     this.setColour("#9B59B6");
     this.setTooltip("Stop any currently playing RTTTL song");
     this.setHelpUrl("");
+  }
+};
+
+// Sensor blocks
+Blockly.Blocks['jazrobot_ultrasonic_read'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Read ultrasonic distance (cm)");
+    this.setOutput(true, "Number");
+    this.setColour("#E54B4B");
+    this.setTooltip("Reads distance in cm from ultrasonic sensor (Trig=18, Echo=4)");
+    this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['jazrobot_line_follower'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Line sensor")
+        .appendField(new Blockly.FieldDropdown([
+          ["Left", "33"], 
+          ["Right", "36"]
+        ]), "SENSOR_PIN")
+        .appendField(new Blockly.FieldDropdown([
+          ["sees Black", "1"], 
+          ["sees White", "0"]
+        ]), "DETECT_COLOR");
+    this.setOutput(true, "Boolean");
+    this.setColour("#E54B4B"); // Sensor category color
+    this.setTooltip("Checks if the specified line sensor detects black or white. Left=Pin33, Right=Pin36. Black=1, White=0.");
+    this.setHelpUrl("");
+  }
+};
+
+// Custom Control Logic/Math Blocks (green color)
+Blockly.Blocks['jazrobot_logic_compare'] = {
+  init: function() {
+    var OPERATORS = [
+      ['=', 'EQ'],
+      ['\u2260', 'NEQ'], // ≠
+      ['<', 'LT'],
+      ['\u2264', 'LTE'], // ≤
+      ['>', 'GT'],
+      ['\u2265', 'GTE'] // ≥
+    ];
+    this.setHelpUrl(Blockly.Msg.LOGIC_COMPARE_HELPURL);
+    this.setColour("#5CA65C"); // Control category color
+    this.setOutput(true, 'Boolean');
+    this.appendValueInput('A');
+    this.appendValueInput('B').appendField(new Blockly.FieldDropdown(OPERATORS), 'OP');
+    this.setInputsInline(true);
+    // Assign 'this' to a variable for use in the tooltip closure.
+    var thisBlock = this;
+    this.setTooltip(function() {
+      var op = thisBlock.getFieldValue('OP');
+      var TOOLTIPS = {
+        'EQ': Blockly.Msg.LOGIC_COMPARE_TOOLTIP_EQ,
+        'NEQ': Blockly.Msg.LOGIC_COMPARE_TOOLTIP_NEQ,
+        'LT': Blockly.Msg.LOGIC_COMPARE_TOOLTIP_LT,
+        'LTE': Blockly.Msg.LOGIC_COMPARE_TOOLTIP_LTE,
+        'GT': Blockly.Msg.LOGIC_COMPARE_TOOLTIP_GT,
+        'GTE': Blockly.Msg.LOGIC_COMPARE_TOOLTIP_GTE
+      };
+      return TOOLTIPS[op];
+    });
+    this.prevBlocks_ = [null, null];
+  }
+  // Add other necessary functions like saveConnections if needed based on standard block
+};
+
+Blockly.Blocks['jazrobot_math_number'] = {
+  init: function() {
+    this.setHelpUrl(Blockly.Msg.MATH_NUMBER_HELPURL);
+    this.setColour("#5CA65C"); // Control category color
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldNumber('0'), 'NUM'); // Default value 0
+    this.setOutput(true, 'Number');
+    this.setTooltip(Blockly.Msg.MATH_NUMBER_TOOLTIP);
+  }
+};
+
+Blockly.Blocks['jazrobot_logic_boolean'] = {
+  init: function() {
+    var BOOLEANS = [
+      [Blockly.Msg.LOGIC_BOOLEAN_TRUE, 'TRUE'],
+      [Blockly.Msg.LOGIC_BOOLEAN_FALSE, 'FALSE']
+    ];
+    this.setHelpUrl(Blockly.Msg.LOGIC_BOOLEAN_HELPURL);
+    this.setColour("#5CA65C"); // Control category color
+    this.setOutput(true, 'Boolean');
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown(BOOLEANS), 'BOOL');
+    this.setTooltip(Blockly.Msg.LOGIC_BOOLEAN_TOOLTIP);
   }
 }; 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <toolbox>
  
-   <parametre id="defaultCategories1">START,CONTROL,MOVE,SHOW,AUDIO</parametre>
+   <parametre id="defaultCategories1">START,CONTROL,MOVE,SHOW,AUDIO,SENSORS</parametre>
 
    <category name="START" colour="#FF6680">
       <block type="jazrobot_start"></block>
@@ -24,15 +24,7 @@
          </value>
       </block>
       
-      <block type="jazrobot_forever"></block>
-      
-      <block type="jazrobot_if">
-         <value name="CONDITION">
-            <shadow type="logic_boolean">
-               <field name="BOOL">TRUE</field>
-            </shadow>
-         </value>
-      </block>
+      <block type="jazrobot_if"></block>
       
       <block type="jazrobot_if_else">
          <value name="CONDITION">
@@ -56,6 +48,14 @@
                <field name="BOOL">TRUE</field>
             </shadow>
          </value>
+      </block>
+      <sep></sep>
+      <block type="jazrobot_logic_compare"></block>
+      <block type="jazrobot_math_number">
+         <field name="NUM">10</field>
+      </block>
+      <block type="jazrobot_logic_boolean">
+         <field name="BOOL">TRUE</field>
       </block>
    </category>
 
@@ -172,5 +172,10 @@
          </value>
       </block>
       <block type="jazrobot_stop_music"></block>
+   </category>
+
+   <category name="SENSORS" colour="#E54B4B">
+      <block type="jazrobot_ultrasonic_read"></block>
+      <block type="jazrobot_line_follower"></block>
    </category>
 </toolbox> 
