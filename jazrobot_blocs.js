@@ -582,4 +582,37 @@ Blockly.Blocks['jazrobot_logic_boolean'] = {
         .appendField(new Blockly.FieldDropdown(BOOLEANS), 'BOOL');
     this.setTooltip(Blockly.Msg.LOGIC_BOOLEAN_TOOLTIP);
   }
+};
+
+Blockly.Blocks['jazrobot_servo_write'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Set servo")
+        .appendField(new Blockly.FieldDropdown([
+          ["Servo 1 (Pin 2)", "2"], 
+          ["Servo 2 (Pin 5)", "5"]
+        ]), "SERVO_PIN");
+    this.appendValueInput("ANGLE")
+        .setCheck("Number")
+        .appendField("angle to");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour("#7289DA"); // MOVE category color
+    this.setTooltip("Sets the angle of the selected servo (Pin 2 or Pin 5) between 0-180 degrees.");
+    this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['jazrobot_stop_moving'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Stop moving");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour("#7289DA"); // MOVE category color
+    this.setTooltip("Stops both motors.");
+    this.setHelpUrl("");
+  }
 }; 

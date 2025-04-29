@@ -585,3 +585,47 @@ Blockly.Arduino['jazrobot_buzzer_continuous_on'] = function(block) {
   
   return code;
 };
+
+Blockly.Arduino['jazrobot_servo_write'] = function(block) {
+  var servoPin = block.getFieldValue('SERVO_PIN'); // Get selected pin (e.g., "2" or "5")
+  var angle = Blockly.Arduino.valueToCode(block, 'ANGLE', Blockly.Arduino.ORDER_ATOMIC) || '90';
+
+  // Include Servo library (ensure it's included only once globally)
+  Blockly.Arduino.definitions_['define_servo'] = '#include <ESP32Servo.h>';
+  
+  // Define servo object based on the pin
+  var servoName = 'servo_' + servoPin;
+  // Ensure servo object is defined only once per pin
+  if (!Blockly.Arduino.definitions_['var_' + servoName]) { 
+    Blockly.Arduino.definitions_['var_' + servoName] = 'Servo ' + servoName + ';';
+  }
+  
+  // Attach servo in setup (ensure it's attached only once per pin)
+  var setupKey = 'setup_' + servoName;
+  if (!Blockly.Arduino.setups_[setupKey]) { 
+    Blockly.Arduino.setups_[setupKey] = servoName + '.attach(' + servoPin + ');';
+  }
+
+  // Generate the write command for the specific servo
+  var code = servoName + '.write(' + angle + ');\n';
+  return code;
+};
+
+Blockly.Arduino['jazrobot_stop_moving'] = function(block) {
+  ensurePwmSetup(); // Ensure PWM is initialized
+  
+  // Define stop function if not already defined by other blocks
+  var stopFuncName = 'jazrobot_stop_motors';
+  if (!Blockly.Arduino.definitions_[stopFuncName]) {
+      var stopFunctionCode = 
+        'void ' + stopFuncName + '() {\n' +
+        '  // Stop both motors by setting PWM duty cycle to 0\n' +
+        '  ledcWrite(0, 0); ledcWrite(1, 0);\n' +
+        '}\n';
+      Blockly.Arduino.definitions_[stopFuncName] = stopFunctionCode;
+  }
+  
+  // Call the stop function
+  var code = stopFuncName + '();\n';
+  return code;
+};
