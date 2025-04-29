@@ -461,6 +461,20 @@ Blockly.Blocks['jazrobot_stop_music'] = {
   }
 };
 
+Blockly.Blocks['jazrobot_buzzer_continuous_on'] = {
+  init: function() {
+    this.appendValueInput("FREQUENCY")
+        .setCheck("Number")
+        .appendField("Turn on buzzer (Pin 15) at frequency (Hz)");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour("#9B59B6");
+    this.setTooltip("Turns the buzzer on Pin 15 on continuously at the specified frequency.");
+    this.setHelpUrl("");
+  }
+};
+
 // Sensor blocks
 Blockly.Blocks['jazrobot_ultrasonic_read'] = {
   init: function() {
@@ -488,6 +502,22 @@ Blockly.Blocks['jazrobot_line_follower'] = {
     this.setOutput(true, "Boolean");
     this.setColour("#E54B4B"); // Sensor category color
     this.setTooltip("Checks if the specified line sensor detects black or white. Left=Pin33, Right=Pin36. Black=1, White=0.");
+    this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['jazrobot_push_button'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Push button")
+        .appendField(new Blockly.FieldDropdown([
+          ["PB1 (Pin 17)", "17"], 
+          ["PB2 (Pin 16)", "16"]
+        ]), "BUTTON_PIN")
+        .appendField("is pressed");
+    this.setOutput(true, "Boolean");
+    this.setColour("#E54B4B"); // Sensor category color
+    this.setTooltip("Checks if the specified push button is pressed (reads LOW). PB1=Pin17, PB2=Pin16.");
     this.setHelpUrl("");
   }
 };

@@ -556,3 +556,32 @@ Blockly.Arduino['jazrobot_line_follower'] = function(block) {
   var code = 'digitalRead(' + sensorPin + ') == ' + detectColor;
   return [code, Blockly.Arduino.ORDER_EQUALITY];
 };
+
+Blockly.Arduino['jazrobot_push_button'] = function(block) {
+  var buttonPin = block.getFieldValue('BUTTON_PIN'); // Will be "16" or "17"
+
+  // Ensure pin is set to input with pullup in setup
+  var setupPinKey = 'setup_push_button_' + buttonPin;
+  Blockly.Arduino.setups_[setupPinKey] = 'pinMode(' + buttonPin + ', INPUT_PULLUP);'; // Use INPUT_PULLUP for active-low buttons
+  
+  // Generate the condition check (pressed == LOW == 0)
+  var code = 'digitalRead(' + buttonPin + ') == LOW'; // Or digitalRead(buttonPin) == 0
+  return [code, Blockly.Arduino.ORDER_EQUALITY];
+};
+
+Blockly.Arduino['jazrobot_buzzer_continuous_on'] = function(block) {
+  var frequency = Blockly.Arduino.valueToCode(block, 'FREQUENCY', Blockly.Arduino.ORDER_ATOMIC) || '1000';
+  
+  // Add tone library include and definitions if not already present
+  Blockly.Arduino.definitions_['define_tone32'] = '#include <Tone32.h>';
+  Blockly.Arduino.definitions_['define_buzzer_channel'] = '#define BUZZER_CHANNEL 0'; // Use channel 0 for buzzer
+  Blockly.Arduino.definitions_['define_buzzer_pin_15'] = '#define BUZZER_PIN 15'; // Define the buzzer pin explicitly
+
+  // Ensure the pin is attached in setup (might be redundant if play_tone/note used, but safe)
+  Blockly.Arduino.setups_['setup_buzzer_pin_15'] = 'pinMode(BUZZER_PIN, OUTPUT);';
+
+  var code = '// Turn buzzer on continuously\n';
+  code += 'tone(BUZZER_PIN, ' + frequency + ', 0, BUZZER_CHANNEL);\n'; // Duration 0 for continuous
+  
+  return code;
+};

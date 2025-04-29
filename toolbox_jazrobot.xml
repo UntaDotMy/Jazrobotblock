@@ -160,6 +160,14 @@
             </shadow>
          </value>
       </block>
+
+      <block type="jazrobot_buzzer_continuous_on">
+         <value name="FREQUENCY">
+            <shadow type="math_number">
+               <field name="NUM">1000</field>
+            </shadow>
+         </value>
+      </block>
       
       <block type="jazrobot_stop_tone"></block>
       <sep></sep>
@@ -177,5 +185,6 @@
    <category name="SENSORS" colour="#E54B4B">
       <block type="jazrobot_ultrasonic_read"></block>
       <block type="jazrobot_line_follower"></block>
+      <block type="jazrobot_push_button"></block>
    </category>
 </toolbox> 
